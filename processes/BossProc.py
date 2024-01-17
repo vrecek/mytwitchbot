@@ -23,8 +23,8 @@ def BossProcess(APP: BotApp, dictProxy) -> None:
         if fromWho == RECEIVE_FROM and '!boss' in userMsg:
             print(f'[BOSS] {datetime.now().strftime("[%H:%M:%S]")} {COMMAND}')
             
-            APP.send('user', COMMAND)
-            sleep(5)
+            APP.send(COMMAND)
+            sleep(4)
 
 
     while True:
