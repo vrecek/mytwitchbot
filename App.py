@@ -1,12 +1,15 @@
 import json
 import os
+import signal
 from operator import itemgetter
 from irc import twitch_irc
+from multiprocessing import Process
+from typing import Callable
 
 
 class BotApp:
     def __init__(self, config_file: str) -> None:
-        """Required config fields: `channel, user_sender.oauth, user_sender.name, bot_sender.oauth, bot_sender.name`"""
+        """Required config fields: `channel, user.oauth, user.name"""
 
         if not os.path.isfile(config_file):
             raise Exception("Config file does not exist")
@@ -17,64 +20,75 @@ class BotApp:
 
             try:
                 itemgetter('channel')(deserialized)
-                itemgetter('name', 'oauth')(deserialized["user_sender"])
-                itemgetter('name', 'oauth')(deserialized["bot_sender"])
+                itemgetter('name', 'oauth')(deserialized["user"])
                 
             except:
                 raise Exception("Some fields are missing")
                 
             self.__config = deserialized
-            self.vars = {}
-
-    def __send_listen_help(self, user: str, type: str, val):
-        ch = self.getConfigInfo('channel')
-
-        if user == 'bot':
-            conn = self.__connBot
-        elif user == 'user':
-            conn = self.__connUser
-
-        if type == 'send':
-            conn.send(ch, val)
-        elif type == 'listen':
-            conn.listen(ch, on_message=val)
+            self.__processes = []
 
 
 
-    def connect(self):
-        self.__connUser = twitch_irc.TwitchIRC(
+    def connect(self) -> None:
+        self.__conn = twitch_irc.TwitchIRC(
             self.getConfigInfo('user_name'),
             self.getConfigInfo('user_oauth'),
         )
 
-        self.__connBot = twitch_irc.TwitchIRC(
-            self.getConfigInfo('bot_name'),
-            self.getConfigInfo('bot_oauth'),
-        )
+
+    def newProcess(self, fn: Callable, name: str, *args) -> Process:
+        def processHandler(proc_args):
+            signal.signal(signal.SIGINT, lambda sig,frame: exit(0))
+            fn(*proc_args)
+
+
+        proc = Process(target=processHandler, args=(args,))
+
+        self.__processes.append({
+            "name": name,
+            "proc": proc
+        })
+
+        return proc
+
+
+    def launchProcesses(self) -> None:
+        for p in self.__processes:
+            print(f'[INFO] Process -{p["name"]}- has started')
+
+            p["proc"].daemon = True
+            p["proc"].start()
+
+        for p in self.__processes:
+            p["proc"].join()
+
+
+    def send(self, msg: str) -> None:
+        self.__conn.send(self.__config["channel"], msg)
+
+    
+    def listen(self, listenFn: Callable) -> None:
+        self.__conn.listen(self.__config["channel"], on_message=listenFn)
+
+
+    def getDictProxyResponse(self, proxy, asDict = False) -> (dict | list):
+        if not 'fromWho' in proxy or not 'userMsg' in proxy:
+            return {"fromWho": "", "userMsg": ""} if asDict else ["", ""]
+        
+        return {**proxy} if asDict else list(proxy.values())
     
 
-    def send(self, user: str, msg: str) -> None:
-        """`user` field must be either 'bot' or 'user'"""
-
-        self.__send_listen_help(user, 'send', msg)
-
-    
-    def listen(self, user, listenFn) -> None:
-        """`user` field must be either 'bot' or 'user'"""
-
-        self.__send_listen_help(user, 'listen', listenFn)
+    def canContinueLoop(self, original: list, buff: list) -> bool:
+        # 0 == fromWho, 1 = userMsg
+        if (original[0] == buff[0]) and (original[1] == buff[1]):
+            return False
+        
+        return True
 
 
-    def setVar(self, key: str, val: str) -> None:
-        self.vars[key] = val
-
-
-    def getVar(self, key: str):
-        return self.vars[key] if key in self.vars else None
-
-
-    def getConfigInfo(self, key: str):
-        """Possible keys: `user_name, user_oauth, bot_name, bot_oauth, channel`"""
+    def getConfigInfo(self, key: str) -> (str | int):
+        """Possible keys: `user_name, user_oauth, channel`"""
     
         c = self.__config
 
@@ -83,23 +97,17 @@ class BotApp:
                 return c["channel"]
             
             case "user_name": 
-                return c["user_sender"]["name"]
+                return c["user"]["name"]
             
             case "user_oauth": 
-                return c["user_sender"]["oauth"]
-            
-            case "bot_name": 
-                return c["bot_sender"]["name"]
-            
-            case "bot_oauth": 
-                return c["bot_sender"]["oauth"]
+                return c["user"]["oauth"]
             
             case _: 
-                raise Exception(f"Field `{key}` not found")
-            
+                if not key in c:
+                    raise Exception(f"Field `{key}` not found")
+
+                return c[key]
+                           
 
     def closeConnection(self) -> None:
-        """Closes both connections"""
-
-        self.__connUser.close_connection()
-        self.__connBot.close_connection()
+        self.__conn.close_connection()

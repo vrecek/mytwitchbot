@@ -1,6 +1,8 @@
 from App import BotApp
-from multiprocessing import Process
+from multiprocessing import Manager
 from processes.FishProc import FishProcess
+from processes.BossProc import BossProcess
+from processes.ListenProcess import ListenProcess
 
 
 if __name__ == '__main__':
@@ -10,20 +12,16 @@ if __name__ == '__main__':
         APP.connect()
         print(f'[INFO] Established connection to the IRC')
 
+        with Manager() as manager:
+            responseDict = manager.dict(APP.getDictProxyResponse({}, True))
+            processes = [
+                APP.newProcess(ListenProcess, "Listen", APP, responseDict),
+                APP.newProcess(FishProcess, "Fish", APP, responseDict),
+                APP.newProcess(BossProcess, "Boss", APP, responseDict)
+            ]
 
-        processes = [
-            Process(target=FishProcess, args=(APP,))
-        ]
-
-
-        for proc in processes:
-            proc.daemon = True
-            proc.start()
-
-        for proc in processes:
-            proc.join()
-
-
+            APP.launchProcesses()
+        
     except KeyboardInterrupt:
         APP.closeConnection()
         print('[EXIT] Exit requested')
