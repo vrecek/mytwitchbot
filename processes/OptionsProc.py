@@ -23,7 +23,7 @@ def OptionsProcess(APP: BotApp, dictProxy) -> None:
             split = userMsg[2:].split(' ')
             command, *args = split
 
-            sleep(.5)
+            sleep(.75)
 
             match(command):
                 # `set` command
@@ -42,7 +42,24 @@ def OptionsProcess(APP: BotApp, dictProxy) -> None:
                         action: switch
                     })
 
+                    print(f'[OPTIONS] Changed `{action}` to `{switch}')
                     APP.send(f"[✅] Changed `{action}` to `{switch}`")
+
+
+                # `say` command
+                case "say":
+                    string, num = args
+
+                    if not num.isnumeric():
+                        APP.send("[❌] Incorrect `say` number argument")
+                        return
+
+                    s = ""
+                    for x in range(abs(int(num))):
+                        s += f"{string} "
+
+                    APP.send(s)
+
 
                 # `settings` command
                 case "settings":
@@ -56,12 +73,10 @@ def OptionsProcess(APP: BotApp, dictProxy) -> None:
 
                     APP.send(f'[ℹ️] {string}')
 
+
                 case _:
                     APP.send("[❌] Incorrect command")
                     return
-
-
-            sleep(.5)
 
 
     while True:

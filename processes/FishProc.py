@@ -28,6 +28,9 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
     def typeCommand() -> None:
         nonlocal activeTimer
 
+        if not dictProxy["fish"]:
+            return
+
         # Send the message and print a timestamp
         APP.send(COMMAND)
         print(f"[FISH] {datetime.today().strftime('[%H:%M:%S]')} {COMMAND}")
@@ -43,20 +46,21 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
 
         # Handle the fish toggling
         # # # # # # # # # # # # # # 
+        # If toggled off
         if not dictProxy["fish"]: 
             fishToggle = False
             if activeTimer:
-                # Clear the timer
                 activeTimer.cancel()
                 activeTimer = None
 
             return
         
+        # If toggled on
         if not fishToggle:
             fishToggle = True
-            typeCommand()
 
-            return
+            sleep(1.75)
+            typeCommand()
         # # # # # # # # # # # # # # 
         
         # Get sender username and his message
@@ -91,8 +95,8 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
 
             # Wait 30 minutes and re-type
             sleep(1802)
-
             typeCommand()
+
             return
 
 
@@ -121,8 +125,6 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
 
 
     # Type the first message, and start listening
-    if dictProxy["fish"]:
-        threading.Timer(1, typeCommand).start()
-
+    threading.Timer(1, typeCommand).start()
     while True:
         fishChannel()
