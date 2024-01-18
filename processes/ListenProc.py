@@ -9,7 +9,7 @@ def ListenProcess(APP: BotApp, dictProxy):
         # Do not update if the response is the same
         if fromWho == dictProxy["fromWho"] and userMsg == dictProxy["userMsg"]:
             return
-
+            
         # Set the correct values
         dictProxy.update({
             "fromWho": fromWho, 

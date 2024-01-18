@@ -72,22 +72,24 @@ class BotApp:
         self.__conn.listen(self.__config["channel"], on_message=listenFn)
 
 
-    def getDictProxyResponse(self, proxy, asDict = False) -> (dict | list):
-        if not 'fromWho' in proxy or not 'userMsg' in proxy:
-            return {"fromWho": "", "userMsg": ""} if asDict else ["", ""]
-        
-        return {**proxy} if asDict else list(proxy.values())
+    def getDictProxyValues(self, proxy, additionalValues: list = None) -> list:
+        proxyValues = list(proxy.values())[0:2]
+
+        if additionalValues:
+            proxyValues.append([proxy[x] if x in proxy else None for x in additionalValues])
+
+        return proxyValues
     
 
     def canContinueLoop(self, original: list, buff: list) -> bool:
-        # 0 == fromWho, 1 = userMsg
+        """First array element should be `fromWho` and second should be `userMsg`"""
         if (original[0] == buff[0]) and (original[1] == buff[1]):
             return False
-        
+
         return True
 
 
-    def getConfigInfo(self, key: str) -> (str | int):
+    def getConfigInfo(self, key: str) -> str:
         """Possible keys: `user_name, user_oauth, channel`"""
     
         c = self.__config

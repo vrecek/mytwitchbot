@@ -13,6 +13,7 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
     COMMAND = '$fish'
     TIMER_TIMEOUT = 120.0
     activeTimer = None
+    fishToggle = True
     buff = ['', '']
 
 
@@ -38,9 +39,28 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
     def fishChannel() -> None:
         nonlocal activeTimer
         nonlocal buff
+        nonlocal fishToggle
 
+        # Handle the fish toggling
+        # # # # # # # # # # # # # # 
+        if not dictProxy["fish"]: 
+            fishToggle = False
+            if activeTimer:
+                # Clear the timer
+                activeTimer.cancel()
+                activeTimer = None
+
+            return
+        
+        if not fishToggle:
+            fishToggle = True
+            typeCommand()
+
+            return
+        # # # # # # # # # # # # # # 
+        
         # Get sender username and his message
-        fromWho, userMsg = APP.getDictProxyResponse(dictProxy)
+        fromWho, userMsg = APP.getDictProxyValues(dictProxy)
 
         # Compare the values
         if not APP.canContinueLoop([fromWho, userMsg], buff):
@@ -101,6 +121,8 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
 
 
     # Type the first message, and start listening
-    threading.Timer(1, typeCommand).start()
+    if dictProxy["fish"]:
+        threading.Timer(1, typeCommand).start()
+
     while True:
         fishChannel()

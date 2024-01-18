@@ -12,7 +12,10 @@ def BossProcess(APP: BotApp, dictProxy) -> None:
     def bossChannel():
         nonlocal buff
 
-        fromWho, userMsg = APP.getDictProxyResponse(dictProxy)
+        # `boss` is required to be True
+        if not dictProxy["boss"]: return
+        
+        fromWho, userMsg = APP.getDictProxyValues(dictProxy)
 
         # Compare the values
         if not APP.canContinueLoop([fromWho, userMsg], buff):
@@ -24,7 +27,7 @@ def BossProcess(APP: BotApp, dictProxy) -> None:
             print(f'[BOSS] {datetime.now().strftime("[%H:%M:%S]")} {COMMAND}')
             
             APP.send(COMMAND)
-            sleep(4)
+            sleep(5)
 
 
     while True:

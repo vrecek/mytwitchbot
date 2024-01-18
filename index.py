@@ -2,7 +2,17 @@ from App import BotApp
 from multiprocessing import Manager
 from processes.FishProc import FishProcess
 from processes.BossProc import BossProcess
-from processes.ListenProcess import ListenProcess
+from processes.ListenProc import ListenProcess
+from processes.OptionsProc import OptionsProcess
+
+
+def getInitialProxy() -> dict:
+    return {
+        "fromWho": "", 
+        "userMsg": "",
+        "fish": True,
+        "boss": True
+    }
 
 
 if __name__ == '__main__':
@@ -13,11 +23,12 @@ if __name__ == '__main__':
         print(f'[INFO] Established connection to the IRC')
 
         with Manager() as manager:
-            responseDict = manager.dict(APP.getDictProxyResponse({}, True))
+            responseDict = manager.dict(getInitialProxy())
             processes = [
                 APP.newProcess(ListenProcess, "Listen", APP, responseDict),
                 APP.newProcess(FishProcess, "Fish", APP, responseDict),
-                APP.newProcess(BossProcess, "Boss", APP, responseDict)
+                APP.newProcess(BossProcess, "Boss", APP, responseDict),
+                APP.newProcess(OptionsProcess, "Options", APP, responseDict)
             ]
 
             APP.launchProcesses()
