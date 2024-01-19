@@ -5,7 +5,12 @@ from processes.BossProc import BossProcess
 from processes.ListenProc import ListenProcess
 from processes.OptionsProc import OptionsProcess
 
+## config.json ##
+# channel: str
+# user: { name: str, oauth: str }
+##             ##
 
+# Leave as it is, eventually add a new entries
 def getInitialProxy() -> dict:
     return {
         "fromWho": "", 

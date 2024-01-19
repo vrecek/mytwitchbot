@@ -13,6 +13,7 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
     COMMAND = '$fish'
     TIMER_TIMEOUT = 120.0
     activeTimer = None
+    nextTimer = False
     fishToggle = True
     buff = ['', '']
 
@@ -41,6 +42,7 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
 
     def fishChannel() -> None:
         nonlocal activeTimer
+        nonlocal nextTimer
         nonlocal buff
         nonlocal fishToggle
 
@@ -121,7 +123,9 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
 
         # Type the next message if the time pass
         print(f'[FISH INFO] Next message in {m}m {s}s')
-        threading.Timer(seconds, typeCommand).start()
+
+        sleep(seconds)
+        typeCommand()
 
 
     # Type the first message, and start listening
