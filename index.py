@@ -1,7 +1,7 @@
 from App import BotApp
 from multiprocessing import Manager
 from processes.FishProc import FishProcess
-from processes.BossProc import BossProcess
+from processes.BFHProc import BFHProcess
 from processes.ListenProc import ListenProcess
 from processes.OptionsProc import OptionsProcess
 
@@ -16,7 +16,9 @@ def getInitialProxy() -> dict:
         "fromWho": "", 
         "userMsg": "",
         "fish": True,
-        "boss": True
+        "ffa": True,
+        "boss": True,
+        "heist": 1000
     }
 
 
@@ -29,15 +31,17 @@ if __name__ == '__main__':
 
         with Manager() as manager:
             responseDict = manager.dict(getInitialProxy())
+            
             processes = [
                 APP.newProcess(ListenProcess, "Listen", APP, responseDict),
                 APP.newProcess(FishProcess, "Fish", APP, responseDict),
-                APP.newProcess(BossProcess, "Boss", APP, responseDict),
-                APP.newProcess(OptionsProcess, "Options", APP, responseDict)
+                APP.newProcess(BFHProcess, "Boss/FFA/Heist", APP, responseDict),
+                APP.newProcess(OptionsProcess, "Options", APP, responseDict),
             ]
 
             APP.launchProcesses()
-        
+
+
     except KeyboardInterrupt:
         APP.closeConnection()
         print('[EXIT] Exit requested')

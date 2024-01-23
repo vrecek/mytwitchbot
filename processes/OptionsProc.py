@@ -1,10 +1,13 @@
 from App import BotApp
 from time import sleep
+from subprocess import run
+from signal import SIGKILL
 import json
+import os 
 
 
 def OptionsProcess(APP: BotApp, dictProxy) -> None:
-    SET_ACTION = ['fish', 'boss']
+    SET_ACTION = ['fish', 'boss', 'ffa', 'heist']
     buff = ["", ""]
 
 
@@ -25,24 +28,42 @@ def OptionsProcess(APP: BotApp, dictProxy) -> None:
 
             sleep(.75)
 
-            match(command):
+            match (command):
                 # `set` command
                 case "set":
                     # Return if the length is different than 2, or action/switch is incorrect
-                    if len(args) != 2 or args[0] not in SET_ACTION or args[1] not in ['on', 'off']:
+                    if len(args) != 2 or args[0] not in SET_ACTION:
                         APP.send("[❌] Incorrect `set` arguments")
                         return 
 
                     # Change switch on/off to True/False
                     action, switch = args
-                    switch = True if switch == 'on' else False
+
+                    # Heist
+                    if action == 'heist':
+                        if switch.isnumeric():
+                            switch = int(switch)
+                        elif switch == 'off':
+                            switch = False
+                        else:
+                            APP.send("[❌] Incorrect `set heist` arguments")
+                            return 
+                        
+                    # Other option
+                    else:
+                        if switch not in ['on', 'off']:
+                            APP.send("[❌] Incorrect `set` arguments")
+                            return 
+
+                        switch = True if switch == 'on' else False
+
 
                     # Update the proxy with a new value
                     dictProxy.update({
                         action: switch
                     })
 
-                    print(f'[OPTIONS] Changed `{action}` to `{switch}')
+                    print(f'[OPTIONS] Changed `{action}` to `{switch}`')
                     APP.send(f"[✅] Changed `{action}` to `{switch}`")
 
 
@@ -93,6 +114,29 @@ def OptionsProcess(APP: BotApp, dictProxy) -> None:
                     s = ' '.join([f'{x}: {dictProxy[x]} | ' for x in SET_ACTION])[:-2]
 
                     APP.send(f'[ℹ️] {s}')
+
+
+                # `exit` command
+                case "exit":
+                    # Run the command to get the current processes
+                    shstr = "ps -u | grep 'python3 index.py' | awk '{print $2}'"
+                    sh = run(shstr, capture_output=True, shell=True).stdout.decode()
+
+                    # Split the PIDs to the array, and remove the main PID
+                    arr = sh.rstrip().split('\n')
+                    arr.remove( str(os.getppid()) )
+
+                    for pid in arr:
+                        pid = int(pid)
+
+                        try:
+                            if pid == os.getpid():
+                                print('[EXIT] Exit input')
+
+                            os.kill(pid, SIGKILL)
+
+                        except Exception:
+                            continue
 
 
                 case _:

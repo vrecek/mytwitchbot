@@ -109,7 +109,7 @@ class BotApp:
                     raise Exception(f"Field `{key}` not found")
 
                 return c[key]
-                           
+         
 
     def closeConnection(self) -> None:
         self.__conn.close_connection()
