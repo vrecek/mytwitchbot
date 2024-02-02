@@ -1,4 +1,5 @@
 from App import BotApp
+from math import floor
 from time import sleep
 from subprocess import run
 from signal import SIGKILL
@@ -6,7 +7,7 @@ import json
 import os 
 
 
-def OptionsProcess(APP: BotApp, dictProxy) -> None:
+def OptionsProcess(APP: BotApp, dictProxy: dict) -> None:
     SET_ACTION = ['fish', 'boss', 'ffa', 'heist']
     buff = ["", ""]
 
@@ -21,12 +22,13 @@ def OptionsProcess(APP: BotApp, dictProxy) -> None:
             return
         buff = [fromWho, userMsg]
 
+
         # Change the app options through a chat
         # Check if the user was the sender, and if he typed a command prefix
         if fromWho == APP.getConfigInfo("user_name") and userMsg[0:2] == '>>':
             command, *args = userMsg[2:].split(' ')
 
-            sleep(.75)
+            sleep(1)
 
             match (command):
                 # `set` command
@@ -100,18 +102,39 @@ def OptionsProcess(APP: BotApp, dictProxy) -> None:
                                 return
                             
                             # Combine the `string` array into a one string
-                            string = ' '.join(rest)
-
-                            s = ' '.join([string for _ in range(int(first))])
+                            string: str = ' '.join(rest)
+                            s: str = (f'{string} ' * int(first)).rstrip()
 
                             APP.send(s)
+
+
+                # `uptime` command
+                case "uptime":
+                    totalSeconds: int = dictProxy["uptime"] 
+
+                    h: int = totalSeconds // 3600
+                    m: int = totalSeconds // 60
+                    s: int = totalSeconds % 60
+
+                    time_str: str = ''
+
+                    def join_time(val: int, letter: str) -> None:
+                        nonlocal time_str
+                        if val:
+                            time_str += f'{val}{letter} '
+
+                    join_time(h, 'h')
+                    join_time(m, 'm')
+                    join_time(s, 's')
+
+                    APP.send(f'[ℹ️] Uptime: {time_str}')
 
 
                 # `settings` command
                 case "settings":
                     # Display SET_ACTION settings
                     # SET_ACTION keys must be in a dictProxy
-                    s = ' '.join([f'{x}: {dictProxy[x]} | ' for x in SET_ACTION])[:-2]
+                    s: str = ' '.join([f'{x}: {dictProxy[x]} | ' for x in SET_ACTION])[:-2]
 
                     APP.send(f'[ℹ️] {s}')
 
@@ -119,15 +142,15 @@ def OptionsProcess(APP: BotApp, dictProxy) -> None:
                 # `exit` command
                 case "exit":
                     # Run the command to get the current processes
-                    shstr = "ps -u | grep 'python3 index.py' | awk '{print $2}'"
-                    sh = run(shstr, capture_output=True, shell=True).stdout.decode()
+                    shstr: str = "ps -u | grep 'python3 index.py' | awk '{print $2}'"
+                    sh: str = run(shstr, capture_output=True, shell=True).stdout.decode()
 
                     # Split the PIDs to the array, and remove the main PID
-                    arr = sh.rstrip().split('\n')
-                    arr.remove( str(os.getppid()) )
+                    arr: list = sh.rstrip().split('\n')
+                    arr.remove(str( os.getppid() ))
 
                     for pid in arr:
-                        pid = int(pid)
+                        pid: int = int(pid)
 
                         try:
                             if pid == os.getpid():
@@ -142,6 +165,8 @@ def OptionsProcess(APP: BotApp, dictProxy) -> None:
                 case _:
                     APP.send("[❌] Incorrect command")
                     return
+                    
+            sleep(1)
 
 
     while True:

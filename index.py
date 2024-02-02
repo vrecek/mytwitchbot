@@ -4,6 +4,7 @@ from processes.FishProc import FishProcess
 from processes.BFHProc import BFHProcess
 from processes.ListenProc import ListenProcess
 from processes.OptionsProc import OptionsProcess
+from processes.MiscProc import MiscProcess
 
 ## config.json ##
 # channel: str
@@ -15,10 +16,13 @@ def getInitialProxy() -> dict:
     return {
         "fromWho": "", 
         "userMsg": "",
+
         "fish": True,
         "ffa": True,
         "boss": True,
-        "heist": 1000
+        "heist": 1000,
+
+        "uptime": 0
     }
 
 
@@ -37,6 +41,7 @@ if __name__ == '__main__':
                 APP.newProcess(FishProcess, "Fish", APP, responseDict),
                 APP.newProcess(BFHProcess, "Boss/FFA/Heist", APP, responseDict),
                 APP.newProcess(OptionsProcess, "Options", APP, responseDict),
+                APP.newProcess(MiscProcess, "Misc", APP, responseDict)
             ]
 
             APP.launchProcesses()

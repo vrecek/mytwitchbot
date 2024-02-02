@@ -7,13 +7,12 @@ import re
 from App import BotApp
 
 
-def FishProcess(APP: BotApp, dictProxy) -> None:
+def FishProcess(APP: BotApp, dictProxy: dict) -> None:
     USERNAME = APP.getConfigInfo('user_name')
     RECEIVE_FROM = 'Supibot'
     COMMAND = '$fish'
     TIMER_TIMEOUT = 120.0
     activeTimer = None
-    nextTimer = False
     fishToggle = True
     buff = ['', '']
 
@@ -42,7 +41,6 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
 
     def fishChannel() -> None:
         nonlocal activeTimer
-        nonlocal nextTimer
         nonlocal buff
         nonlocal fishToggle
 
@@ -61,7 +59,7 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
         if not fishToggle:
             fishToggle = True
 
-            sleep(1.75)
+            sleep(1)
             typeCommand()
         # # # # # # # # # # # # # # 
         
@@ -81,10 +79,9 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
             (not cooldownBrackets)
         ): 
             return
-        
-        
+
         # If a fish has been caught
-        fish = re.search(r'✨(.+)✨', userMsg)
+        fish = re.search(r'✨([^✨]+)✨', userMsg)
         if fish:
             print('[FISH FINISH] Fish has been caught!')
 
@@ -115,7 +112,7 @@ def FishProcess(APP: BotApp, dictProxy) -> None:
 
         seconds = m * 60 + s + 2
         s = seconds % 60
-        m = floor(seconds / 60)
+        m = seconds // 60
 
         # Clear the timer
         activeTimer.cancel()
