@@ -113,7 +113,7 @@ def OptionsProcess(APP: BotApp, dictProxy: dict) -> None:
                     totalSeconds: int = dictProxy["uptime"] 
 
                     h: int = totalSeconds // 3600
-                    m: int = totalSeconds // 60
+                    m: int = totalSeconds // 60 % 60
                     s: int = totalSeconds % 60
 
                     time_str: str = ''
