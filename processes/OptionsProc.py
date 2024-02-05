@@ -3,6 +3,7 @@ from math import floor
 from time import sleep
 from subprocess import run
 from signal import SIGKILL
+from time import time
 import json
 import os 
 
@@ -82,8 +83,9 @@ def OptionsProcess(APP: BotApp, dictProxy: dict) -> None:
                         case 'art':
                             try:
                                 with open('data/ascii.json') as file:
-                                    asciis = json.load(file)
-                                    art_type = rest[0]
+                                    # Open the JSON art file and search for an art
+                                    asciis:   dict = json.load(file)
+                                    art_type: str = rest[0]
 
                                     if art_type not in asciis:
                                         APP.send("[❌] Art not found")
@@ -102,22 +104,29 @@ def OptionsProcess(APP: BotApp, dictProxy: dict) -> None:
                                 return
                             
                             # Combine the `string` array into a one string
-                            string: str = ' '.join(rest)
-                            s: str = (f'{string} ' * int(first)).rstrip()
+                            string:  str = ' '.join(rest)
+                            fullStr: str = (f'{string} ' * int(first)).rstrip()
 
-                            APP.send(s)
+                            APP.send(fullStr)
 
 
                 # `uptime` command
                 case "uptime":
-                    totalSeconds: int = dictProxy["uptime"] 
+                    # Calculate how much time has passed since the beginning
+                    startingTime: int = dictProxy["startingTime"]
+                    currentTime:  int = int( time() * 1000 )
 
+                    totalSeconds: int = (currentTime - startingTime) // 1000
+
+                    # Calculate total hours, minutes and seconds
                     h: int = totalSeconds // 3600
                     m: int = totalSeconds // 60 % 60
                     s: int = totalSeconds % 60
 
                     time_str: str = ''
 
+                    # Reduce redundant code
+                    # Determine whether any hours, minutes, seconds have passed, if yes, append them to the string
                     def join_time(val: int, letter: str) -> None:
                         nonlocal time_str
                         if val:
@@ -143,7 +152,7 @@ def OptionsProcess(APP: BotApp, dictProxy: dict) -> None:
                 case "exit":
                     # Run the command to get the current processes
                     shstr: str = "ps -u | grep 'python3 index.py' | awk '{print $2}'"
-                    sh: str = run(shstr, capture_output=True, shell=True).stdout.decode()
+                    sh:    str = run(shstr, capture_output=True, shell=True).stdout.decode()
 
                     # Split the PIDs to the array, and remove the main PID
                     arr: list = sh.rstrip().split('\n')
@@ -152,6 +161,7 @@ def OptionsProcess(APP: BotApp, dictProxy: dict) -> None:
                     for pid in arr:
                         pid: int = int(pid)
 
+                        # Kill every process
                         try:
                             if pid == os.getpid():
                                 print('[EXIT] Exit input')

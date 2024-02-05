@@ -1,20 +1,19 @@
 from App import BotApp
 from time import sleep
 from math import floor
-from datetime import datetime
 import threading
 import re
 from App import BotApp
 
 
 def FishProcess(APP: BotApp, dictProxy: dict) -> None:
-    USERNAME = APP.getConfigInfo('user_name')
-    RECEIVE_FROM = 'Supibot'
-    COMMAND = '$fish'
-    TIMER_TIMEOUT = 120.0
-    activeTimer = None
-    fishToggle = True
-    buff = ['', '']
+    USERNAME: str = APP.getConfigInfo('user_name')
+    RECEIVE_FROM: str = 'Supibot'
+    COMMAND: str = '$fish'
+    TIMER_TIMEOUT: float = 120.0
+    activeTimer: bool = None
+    fishToggle: bool = True
+    buff: list = ['', '']
 
 
     def timeoutFn() -> None:
@@ -33,7 +32,7 @@ def FishProcess(APP: BotApp, dictProxy: dict) -> None:
 
         # Send the message and print a timestamp
         APP.send(COMMAND)
-        print(f"[FISH] {datetime.today().strftime('[%H:%M:%S]')} {COMMAND}")
+        print(f"[FISH] {APP.getFormattedTime()} {COMMAND}")
 
         # Timeout if the script did not receive a valid answer
         activeTimer = threading.Timer(TIMER_TIMEOUT, timeoutFn)
@@ -100,7 +99,7 @@ def FishProcess(APP: BotApp, dictProxy: dict) -> None:
 
 
         # Filter only numbers
-        nums = re.sub(
+        nums: list = re.sub(
             r'[^0-9 ]',
             '',
             cooldownBrackets.group(1) 

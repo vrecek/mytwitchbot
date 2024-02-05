@@ -1,7 +1,6 @@
 from App import BotApp
 from operator import itemgetter
 from time import sleep
-from datetime import datetime
 from threading import Timer
 
 
@@ -21,7 +20,7 @@ def BFHProcess(APP: BotApp, dictProxy: dict) -> None:
         },
         "heist": {
             "c": f"!heist {dictProxy['heist']}",
-            "t": 6.0,
+            "t": 5.0,
             "b": True
         }
     }
@@ -42,14 +41,13 @@ def BFHProcess(APP: BotApp, dictProxy: dict) -> None:
         res[type]["b"] = True
 
     def exeTimer(type: str, command: str) -> None:
-        print(f'[{type.upper()}] {datetime.now().strftime("[%H:%M:%S]")} {command}')
+        print(f'[{type.upper()}] {APP.getFormattedTime()} {command}')
         APP.send(command)
 
         # "Unlock" the command in 10 seconds
         Timer(10, lambda: allowNext(type)).start()
 
 
-    # Main channel
     def bfhChannel():
         nonlocal buff
 
@@ -60,7 +58,8 @@ def BFHProcess(APP: BotApp, dictProxy: dict) -> None:
             return
         buff = [fromWho, userMsg]
 
-        # Check if the boss/ffa/heist has appeared
+
+        # Check if a boss/ffa/heist has appeared
         if fromWho == RECEIVE_FROM:
             type, command, time = checkResponse(userMsg)
 
