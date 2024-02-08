@@ -18,7 +18,7 @@ class BotApp():
 
         # Open the config file and the required fields
         with open(config_file, 'r') as file:
-            deserialized = json.load(file)
+            deserialized: dict = json.load(file)
 
             try:
                 itemgetter('channel')(deserialized)
@@ -27,8 +27,9 @@ class BotApp():
             except:
                 raise Exception("Some fields are missing")
 
-            self.__config = deserialized
-            self.__processes = []
+
+            self.__config:      dict = deserialized
+            self.__processes:   list = []
 
 
 
@@ -41,23 +42,19 @@ class BotApp():
 
 
     # Create a new process
-    def newProcess(self, fn: Callable, name: str, *args) -> Process:
+    def newProcess(self, fn: Callable, name: str, *args) -> None:
         def processHandler(proc_args):
             # Set a SIGINT signal in case of KeyboardInterrupt
             # And execute the callable argument
             signal.signal(signal.SIGINT, lambda sig,frame: exit(0))
             fn(*proc_args)
 
-        # Create an actual process
-        proc = Process(target=processHandler, args=(args,))
 
-        # Append to the class' process array
+        # Append to the processes array
         self.__processes.append({
             "name": name,
-            "proc": proc
+            "proc": Process(target=processHandler, args=(args,))
         })
-
-        return proc
 
 
     # Start the processes
@@ -101,15 +98,13 @@ class BotApp():
 
         # Compare two messages (current and previous)
         # If the messages are identical, return False
-        if (original[0] == buff[0]) and (original[1] == buff[1]):
-            return False
-
-        return True
+        return not ( (original[0] == buff[0]) and (original[1] == buff[1]) )
 
 
     # Get the config dict fields
+    # If modyfing config.json, modify here as well
     def getConfigInfo(self, key: str) -> str:
-        """Possible keys: `user_name, user_oauth, channel`"""
+        """Possible keys: `user_name, user_oauth, channel, receivers`"""
     
         c = self.__config
 
@@ -122,6 +117,9 @@ class BotApp():
             
             case "user_oauth": 
                 return c["user"]["oauth"]
+
+            case "receivers":
+                return c["receivers"]
             
             case _: 
                 if not key in c:
@@ -130,10 +128,11 @@ class BotApp():
                 return c[key]
          
 
-    #
+    # Get formatted curent time
     def getFormattedTime(self) -> str:
         return datetime.now().strftime("[%H:%M:%S]")
 
 
+    # Closes connection
     def closeConnection(self) -> None:
         self.__conn.close_connection()

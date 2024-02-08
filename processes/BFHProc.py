@@ -5,9 +5,9 @@ from threading import Timer
 
 
 def BFHProcess(APP: BotApp, dictProxy: dict) -> None:
-    RECEIVE_FROM = 'demonzzbot'
-    buff = ['', '']
-    res = {
+    RECEIVE_FROM: str = APP.getConfigInfo('receivers')["bfh"]
+    buff:         list = ['', '']
+    res: dict = {
         "boss": {
             "c": "!boss",
             "t": .5,
@@ -20,14 +20,14 @@ def BFHProcess(APP: BotApp, dictProxy: dict) -> None:
         },
         "heist": {
             "c": f"!heist {dictProxy['heist']}",
-            "t": 5.0,
+            "t": 2.0,
             "b": True
         }
     }
 
 
     def checkResponse(string: str) -> list:
-        # Extract the command, time to exe, bool
+        # Extract: command, time to execute, bool
         for x in res:
             command, time, canNext = itemgetter('c', 't', 'b')(res[x])
 
@@ -61,16 +61,16 @@ def BFHProcess(APP: BotApp, dictProxy: dict) -> None:
 
         # Check if a boss/ffa/heist has appeared
         if fromWho == RECEIVE_FROM:
-            type, command, time = checkResponse(userMsg)
+            type_, command, time = checkResponse(userMsg)
 
-            if not type:
+            if not type_:
                 return
 
             # "Lock" the command, just to prevent sending the same message
-            res[type]["b"] = False
+            res[type_]["b"] = False
 
             # Send the message after `time` seconds
-            Timer(time, lambda: exeTimer(type, command)).start()
+            Timer(time, lambda: exeTimer(type_, command)).start()
 
 
     while True:

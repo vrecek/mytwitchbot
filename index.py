@@ -4,7 +4,6 @@ from processes.FishProc import FishProcess
 from processes.BFHProc import BFHProcess
 from processes.ListenProc import ListenProcess
 from processes.OptionsProc import OptionsProcess
-from processes.MentionProc import MentionProcess
 from time import time
 
 
@@ -44,8 +43,7 @@ if __name__ == '__main__':
             APP.newProcess(FishProcess, "Fish", APP, responseDict)
             APP.newProcess(BFHProcess, "Boss/FFA/Heist", APP, responseDict)
             APP.newProcess(OptionsProcess, "Options", APP, responseDict)
-            APP.newProcess(MentionProcess, "Mention", APP, responseDict)
-
+            
             # Launch processes that you created
             APP.launchProcesses()
 

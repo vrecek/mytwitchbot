@@ -9,8 +9,8 @@ import os
 
 
 def OptionsProcess(APP: BotApp, dictProxy: dict) -> None:
-    SET_ACTION = ['fish', 'boss', 'ffa', 'heist']
-    buff = ["", ""]
+    SET_ACTION: list = ['fish', 'boss', 'ffa', 'heist']
+    buff:       list = ["", ""]
 
 
     def optionsChannel():

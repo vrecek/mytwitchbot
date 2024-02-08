@@ -1,19 +1,20 @@
 from App import BotApp
 from time import sleep
 from math import floor
+from App import BotApp
+from typing import Optional
 import threading
 import re
-from App import BotApp
 
 
 def FishProcess(APP: BotApp, dictProxy: dict) -> None:
-    USERNAME: str = APP.getConfigInfo('user_name')
-    RECEIVE_FROM: str = 'Supibot'
-    COMMAND: str = '$fish'
+    USERNAME:      str = APP.getConfigInfo('user_name')
+    RECEIVE_FROM:  str = APP.getConfigInfo('receivers')["fish"]
+    COMMAND:       str = '$fish'
     TIMER_TIMEOUT: float = 120.0
-    activeTimer: bool = None
-    fishToggle: bool = True
-    buff: list = ['', '']
+    fishToggle:    bool = True
+    buff:          list = ['', '']
+    activeTimer:   Optional[threading.Timer] = None
 
 
     def timeoutFn() -> None:
@@ -80,7 +81,7 @@ def FishProcess(APP: BotApp, dictProxy: dict) -> None:
             return
 
         # If a fish has been caught
-        fish = re.search(r'✨([^✨]+)✨', userMsg)
+        fish: Optional[Match[AnyStr]] = re.search(r'✨([^✨]+)✨', userMsg)
         if fish:
             print('[FISH FINISH] Fish has been caught!')
 
@@ -109,7 +110,7 @@ def FishProcess(APP: BotApp, dictProxy: dict) -> None:
         # Extract the time in seconds
         m, s = [ int(x) for x in (nums if len(nums) == 2 else [0, nums[0]]) ]
 
-        seconds = m * 60 + s + 2
+        seconds: int = m * 60 + s + 2
         s = seconds % 60
         m = seconds // 60
 
