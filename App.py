@@ -2,10 +2,10 @@ import json
 import os
 import signal
 from operator import itemgetter
-from irc import twitch_irc
 from multiprocessing import Process
 from typing import Callable
 from datetime import datetime
+from twitch_chat_irc import twitch_chat_irc
 
 
 class BotApp():
@@ -35,9 +35,10 @@ class BotApp():
 
     # Connect to the IRC
     def connect(self) -> None:
-        self.__conn = twitch_irc.TwitchIRC(
+        self.__conn = twitch_chat_irc.TwitchChatIRC(
             self.getConfigInfo('user_name'),
             self.getConfigInfo('user_oauth'),
+            True
         )
 
 
@@ -118,9 +119,6 @@ class BotApp():
             case "user_oauth": 
                 return c["user"]["oauth"]
 
-            case "receivers":
-                return c["receivers"]
-            
             case _: 
                 if not key in c:
                     raise Exception(f"Field `{key}` not found")

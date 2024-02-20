@@ -7,12 +7,17 @@ from processes.OptionsProc import OptionsProcess
 from time import time
 
 
-## config.json ##
-# channel: str
-# user: { name: str, oauth: str }
-##             ##
+## main config.json fields ##
+'''
+{
+    channel: str
+    user: { 
+        name: str, 
+        oauth: str 
+    }
+}
+'''
 
-# Leave it as it is, eventually add a new entries
 def getInitialProxy() -> dict:
     return {
         "fromWho": "", 
@@ -40,11 +45,12 @@ if __name__ == '__main__':
             
             # Create your processes
             APP.newProcess(ListenProcess, "Listen", APP, responseDict)
+
             APP.newProcess(FishProcess, "Fish", APP, responseDict)
             APP.newProcess(BFHProcess, "Boss/FFA/Heist", APP, responseDict)
             APP.newProcess(OptionsProcess, "Options", APP, responseDict)
             
-            # Launch processes that you created
+            # Launch processes that you just created
             APP.launchProcesses()
 
 
